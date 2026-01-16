@@ -1,31 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Agent Compte Rendu </title>
-    <!-- Styles CSS identiques à l'original (abrégé pour la lisibilité) -->
+    <title>Agent Compte Rendu | BoreSum</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; background: #f5f5f5; color: #333; }
         .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 1.5rem; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 0.5rem; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 2rem; font-size: 0.95em; }
+        
+        /* Onglets */
         .tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 2px solid #eee; }
         .tab { padding: 12px 25px; cursor: pointer; opacity: 0.6; font-weight: 600; transition: all 0.2s; }
         .tab:hover { opacity: 0.8; background: #f9f9f9; }
         .tab.active { opacity: 1; border-bottom: 3px solid #3498db; color: #3498db; background: transparent; }
+        
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Formulaire */
         .form-group { margin-bottom: 1.2rem; }
         label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.95em; color: #34495e; }
-        input[type="text"], input[type="file"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        #log-container { margin-top: 25px; background: #1e1e1e; color: #4caf50; padding: 15px; border-radius: 6px; font-family: 'Consolas', monospace; height: 180px; overflow-y: auto; display: none; font-size: 0.9em; }
-        button.submit-btn { width: 100%; padding: 14px; background: #3498db; color: white; border: none; border-radius: 6px; font-size: 1.1em; font-weight: 600; cursor: pointer; margin-top: 15px; }
+        input[type="text"], input[type="file"], textarea, select { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+            font-family: inherit; font-size: 0.95em; box-sizing: border-box;
+        }
+        input[type="file"] { padding: 8px; background: #fafafa; }
+        textarea { height: 100px; resize: vertical; line-height: 1.4; }
+        
+        /* Logs */
+        #log-container { 
+            margin-top: 25px; background: #1e1e1e; color: #4caf50; 
+            padding: 15px; border-radius: 6px; font-family: 'Consolas', monospace; 
+            height: 180px; overflow-y: auto; display: none; font-size: 0.9em;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        /* Bouton */
+        button.submit-btn { 
+            width: 100%; padding: 14px; background: #3498db; color: white; 
+            border: none; border-radius: 6px; font-size: 1.1em; font-weight: 600; 
+            cursor: pointer; margin-top: 15px; transition: background 0.2s;
+        }
+        button.submit-btn:hover { background: #2980b9; }
         button.submit-btn:disabled { background: #95a5a6; cursor: not-allowed; }
-        .app-footer { margin-top: 3rem; border-top: 1px solid #eee; padding-top: 1rem; font-size: 0.85em; text-align: center; color: #7f8c8d; }
+
+        /* Badge Optionnel */
+        .badge-opt { 
+            font-size: 0.75em; background: #e0e0e0; color: #555; 
+            padding: 2px 6px; border-radius: 4px; font-weight: normal; margin-left: 5px; 
+        }
+
+        /* Footer Info */
+        .app-footer {
+            margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #eee;
+            font-size: 0.9em; color: #7f8c8d; line-height: 1.6;
+        }
+        .footer-content { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .footer-section { flex: 1; min-width: 200px; }
+        .footer-section h4 { color: #2c3e50; margin-bottom: 8px; font-size: 1em; }
+        .social-links a { text-decoration: none; color: #3498db; margin-right: 15px; font-weight: 500; }
+        .social-links a:hover { text-decoration: underline; }
+        
+        .how-it-works ol { padding-left: 20px; margin-top: 5px; }
+        .how-it-works li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
     <div class="card" id="main-card">
-        <h1>🤖 Générateur de Comptes Rendus</h1>
+        <h1>🤖 BoreSum Agent</h1>
+        <div class="subtitle">Générateur de Comptes Rendus Automatique</div>
         
         <input type="hidden" id="client_id" value="{{ uid }}">
 
@@ -38,12 +82,14 @@
             <input type="hidden" name="client_id" value="{{ uid }}">
             <input type="hidden" name="inputType" id="inputType" value="audio">
 
+            <!-- SECTION AUDIO -->
             <div id="audio-section" class="tab-content active">
                 <div class="form-group">
                     <label>Fichier Audio (mp3, m4a, wav, mp4) :</label>
                     <input type="file" name="file" accept="audio/*,video/*">
                 </div>
-                <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin-top: 15px;">
+
+                <div style="background: #f9fafb; padding: 15px; border-radius: 6px; border: 1px solid #eee; margin-top: 15px;">
                     <div class="form-group">
                         <label>Langue de l'audio (Whisper) :</label>
                         <select name="language">
@@ -52,46 +98,84 @@
                             <option value="es">Espagnol (es)</option>
                         </select>
                     </div>
+
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label>Prompt Whisper :</label>
+                        <label>Prompt Whisper (Contexte) <span class="badge-opt">Optionnel</span> :</label>
                         <textarea name="whisperPrompt" style="height: 50px;" placeholder="Ex: Projet Audio2Reu. Intervenants : Sylvain, Thomas."></textarea>
+                        <small style="color:#666; font-size: 0.85em;">Aide l'IA à reconnaître l'orthographe des noms propres spécifiques.</small>
                     </div>
                 </div>
             </div>
 
+            <!-- SECTION TEXTE -->
             <div id="text-section" class="tab-content">
                 <div class="form-group">
                     <label>Collez votre transcription ici :</label>
-                    <textarea name="rawText" style="height: 200px;" placeholder="Collez le texte..."></textarea>
+                    <textarea name="rawText" style="height: 200px;" placeholder="Collez le texte de la réunion ici..."></textarea>
                 </div>
             </div>
 
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
             
-            <h3>⚙️ Configuration du LLM</h3>
+            <h3>⚙️ Configuration du LLM <span style="font-size: 0.6em; font-weight: normal; color: #7f8c8d;">(Avancé)</span></h3>
+
             <div class="form-group">
                 <label>Modèle LLM :</label>
                 <select name="model">
-                    <option value="mistral" selected>Mistral Small 3.2 24B</option>
-                    <option value="gpt">OpenAI GPT-OSS 120B</option>
+                    <option value="mistral" selected>Mistral Small 3.2 24B (Rapide & Efficace)</option>
+                    <option value="gpt">OpenAI GPT-OSS 120B (Plus détaillé)</option>
                 </select>
             </div>
+
             <div class="form-group">
-                <label>Prompt Système :</label>
-                <textarea name="customPrompt" style="height: 120px;">{{ default_prompt }}</textarea>
+                <label>Prompt Système <span class="badge-opt">Optionnel</span> :</label>
+                <textarea name="customPrompt" style="height: 120px; font-size: 0.9em;">{{ default_prompt }}</textarea>
+                <small style="color:#666; font-size: 0.85em;">Modifiez ce texte uniquement si vous souhaitez changer le format ou le ton du résumé.</small>
             </div>
 
             <button type="button" class="submit-btn" id="btn-submit" onclick="handleSubmit()">Lancer le Traitement</button>
         </form>
 
         <div id="log-container"></div>
-        <div class="app-footer">Version 0.2 (Async) • 2026</div>
+
+        <!-- PIED DE PAGE -->
+        <div class="app-footer">
+            <div class="footer-content">
+                <div class="footer-section how-it-works">
+                    <h4>💡 Comment ça marche ?</h4>
+                    <ol>
+                        <li>Votre fichier est envoyé  sur un serveur <strong>sécurisé</strong> .</li>
+                        <li>l'audio est transcrit en texte</li>
+                        <li>Le texte est analysé par un <strong>LLM</strong>.</li>
+                        <li>Un résumé structuré est généré et s'affiche automatiquement.</li>
+                    </ol>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>🔗 Liens & Infos</h4>
+                    <div class="social-links">
+                        <a href="https://github.com/sylvainf/BoreSum/tree/main" target="_blank">📂 Code Source (GitHub)</a>
+                        
+                    </div>
+                    <p style="margin-top: 10px;">
+                        Développé par <strong>Sylvain Ferrand</strong> <a href="https://www.linkedin.com/in/sylvain-ferrand-2a9651b7/" target="_blank"> LinkedIn</a><br>
+                    </p>
+                    <p style="font-size: 0.85em; color: #95a5a6;">
+                        Inférence propulsée par la <a href="https://albert.api.etalab.gouv.fr/" target="_blank" style="color: #95a5a6; text-decoration: underline;">ALBERT - DINUM/Etalab</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Logique Javascript inchangée pour le WebSocket (voir version précédente)
+        // ... (Inclure ici le script JS complet fourni précédemment) ...
+        
         function switchTab(type) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
             if(type === 'audio') {
                 document.querySelectorAll('.tab')[0].classList.add('active');
                 document.getElementById('audio-section').classList.add('active');
@@ -102,9 +186,7 @@
             document.getElementById('inputType').value = type;
         }
 
-        // Variable globale pour le WebSocket
         let ws = null;
-
         function initWebSocket() {
             const uid = document.getElementById('client_id').value;
             const logBox = document.getElementById('log-container');
@@ -112,17 +194,13 @@
             const wsUrl = `${protocol}//${window.location.host}/ws/${uid}`;
             
             ws = new WebSocket(wsUrl);
-            
             ws.onopen = () => console.log("WebSocket connecté");
             
             ws.onmessage = (event) => {
-                // Tentative de parsing JSON pour le résultat final
                 try {
-                    // Si le message commence par {, c'est peut-être notre JSON de fin
                     if (event.data.trim().startsWith('{')) {
                         const data = JSON.parse(event.data);
                         if (data.type === 'result') {
-                            // Remplacement du contenu par le résultat
                             document.open();
                             document.write(data.html);
                             document.close();
@@ -130,9 +208,8 @@
                             return;
                         }
                     }
-                } catch(e) { /* Ce n'est pas du JSON, on continue */ }
+                } catch(e) { }
 
-                // Sinon c'est un log classique
                 if (logBox.style.display !== 'block') logBox.style.display = 'block';
                 const div = document.createElement('div');
                 div.textContent = "> " + event.data;
@@ -145,7 +222,6 @@
             };
         }
 
-        // Connexion au chargement
         window.onload = initWebSocket;
 
         async function handleSubmit() {
@@ -160,13 +236,11 @@
 
             try {
                 const formData = new FormData(form);
-                // On n'attend plus le résultat final ici, juste la confirmation du lancement
                 const response = await fetch('/process', { method: 'POST', body: formData });
 
                 if (response.ok) {
                     const json = await response.json();
                     logBox.innerHTML += `<div>✅ ${json.message}. Attente des résultats...</div>`;
-                    // Le reste sera géré par ws.onmessage
                 } else {
                     const errText = await response.text();
                     logBox.innerHTML += `<div style="color:#e74c3c">❌ Erreur HTTP: ${errText}</div>`;

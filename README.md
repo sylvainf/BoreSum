@@ -72,6 +72,4 @@ docker run -d \
 
 ```
 
-The application will be available at http://YOUR_SERVER_IP:8000.
-
 
