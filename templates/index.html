@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agent Compte Rendu </title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; background: #f5f5f5; color: #333; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 1.5rem; }
+        
+        /* Onglets */
+        .tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 2px solid #eee; }
+        .tab { padding: 12px 25px; cursor: pointer; opacity: 0.6; font-weight: 600; transition: all 0.2s; }
+        .tab:hover { opacity: 0.8; background: #f9f9f9; }
+        .tab.active { opacity: 1; border-bottom: 3px solid #3498db; color: #3498db; background: transparent; }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Formulaire */
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.95em; color: #34495e; }
+        input[type="text"], input[type="file"], textarea, select { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+            font-family: inherit; font-size: 0.95em; box-sizing: border-box;
+        }
+        input[type="file"] { padding: 8px; background: #fafafa; }
+        textarea { height: 100px; resize: vertical; line-height: 1.4; }
+        
+        /* Logs */
+        #log-container { 
+            margin-top: 25px; background: #1e1e1e; color: #4caf50; 
+            padding: 15px; border-radius: 6px; font-family: 'Consolas', monospace; 
+            height: 180px; overflow-y: auto; display: none; font-size: 0.9em;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        /* Bouton */
+        button.submit-btn { 
+            width: 100%; padding: 14px; background: #3498db; color: white; 
+            border: none; border-radius: 6px; font-size: 1.1em; font-weight: 600; 
+            cursor: pointer; margin-top: 15px; transition: background 0.2s;
+        }
+        button.submit-btn:hover { background: #2980b9; }
+        button.submit-btn:disabled { background: #95a5a6; cursor: not-allowed; }
+
+        /* Footer Info */
+        .app-footer {
+            margin-top: 3rem; pt: 1rem; border-top: 1px solid #eee;
+            font-size: 0.85em; color: #7f8c8d; text-align: center; line-height: 1.6;
+        }
+        .tech-stack span {
+            background: #f0f2f5; padding: 2px 6px; border-radius: 4px; border: 1px solid #e1e4e8;
+            font-family: monospace; color: #555;
+        }
+        .version { margin-top: 0.5rem; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="card" id="main-card">
+        <h1>🤖 Générateur de Comptes Rendus depuis un enregistrement</h1>
+        
+        <input type="hidden" id="client_id" value="{{ uid }}">
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('audio')">🎙️ Fichier Audio</div>
+            <div class="tab" onclick="switchTab('text')">📝 Texte Brut</div>
+        </div>
+
+        <form id="mainForm">
+            <input type="hidden" name="client_id" value="{{ uid }}">
+            <input type="hidden" name="inputType" id="inputType" value="audio">
+
+            <!-- SECTION AUDIO : Contient le fichier ET les options Whisper -->
+            <div id="audio-section" class="tab-content active">
+                <div class="form-group">
+                    <label>Fichier Audio (mp3, m4a, wav, mp4) :</label>
+                    <input type="file" name="file" accept="audio/*,video/*">
+                </div>
+
+                <!-- Déplacé ici pour n'apparaitre que pour l'audio -->
+                <div style="background: #f9fafb; padding: 15px; border-radius: 6px; border: 1px solid #eee; margin-top: 15px;">
+                    <div class="form-group">
+                        <label>Langue de l'audio (Whisper) :</label>
+                        <select name="language">
+                            <option value="fr" selected>Français (fr)</option>
+                            <option value="en">Anglais (en)</option>
+                            <option value="es">Espagnol (es)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Prompt Whisper (Contexte, Mots clés) :</label>
+                        <textarea name="whisperPrompt" style="height: 50px;" placeholder="Ex: Projet Audio2Reu. Intervenants : Sylvain, Thomas."></textarea>
+                        <small style="color:#666; font-size: 0.85em;">Aide à l'orthographe des noms propres.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION TEXTE -->
+            <div id="text-section" class="tab-content">
+                <div class="form-group">
+                    <label>Collez votre transcription ici :</label>
+                    <textarea name="rawText" style="height: 200px;" placeholder="Collez le texte de la réunion ici..."></textarea>
+                </div>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <h3>⚙️ Configuration avancé du LLM</h3>
+
+            <div class="form-group">
+                <label>Modèle LLM :</label>
+                <select name="model">
+                    <option value="mistral" selected>Mistral Small 3.2 24B</option>
+                    <option value="gpt">OpenAI GPT-OSS 120B</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Prompt Système :</label>
+                <textarea name="customPrompt" style="height: 120px; font-size: 0.9em;">{{ default_prompt }}</textarea>
+            </div>
+
+            <button type="button" class="submit-btn" id="btn-submit" onclick="handleSubmit()">Lancer le Traitement (prévoir quelques minutes)</button>
+        </form>
+
+        <div id="log-container"></div>
+
+        <!-- PIED DE PAGE INFO -->
+        <div class="app-footer">
+            <div class="tech-stack">
+                <strong>Fonctionnement :</strong> 
+                Prétraitement Audio ➔ 
+                <span>Transcription speach to text via Whisper Large</span> ➔ 
+                <span>Résumé LLM)</span>
+            </div>
+            <div style="margin-top: 5px;">
+                Inference : <strong>API Albert</strong> (Direction Interministérielle du Numérique).
+            </div>
+            <div class="version">
+                Version 0.1 • 11 Janvier 2026 • Sylvain
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(type) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if(type === 'audio') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('audio-section').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('text-section').classList.add('active');
+            }
+            document.getElementById('inputType').value = type;
+        }
+
+        async function handleSubmit() {
+            const btn = document.getElementById('btn-submit');
+            const logBox = document.getElementById('log-container');
+            const uid = document.getElementById('client_id').value;
+            const form = document.getElementById('mainForm');
+            
+            btn.disabled = true;
+            btn.textContent = "Traitement en cours...";
+            logBox.style.display = 'block';
+            logBox.innerHTML = '<div>⏳ Initialisation...</div>';
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/${uid}`;
+            const ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => logBox.innerHTML += '<div>📡 Connexion établie.</div>';
+            
+            ws.onmessage = (event) => {
+                const div = document.createElement('div');
+                div.textContent = "> " + event.data;
+                logBox.appendChild(div);
+                logBox.scrollTop = logBox.scrollHeight;
+            };
+
+            ws.onerror = (e) => logBox.innerHTML += '<div style="color:#e74c3c">❌ Erreur WebSocket</div>';
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch('/process', { method: 'POST', body: formData });
+
+                if (response.ok) {
+                    const resultHtml = await response.text();
+                    ws.close();
+                    document.open();
+                    document.write(resultHtml);
+                    document.close();
+                } else {
+                    const errText = await response.text();
+                    logBox.innerHTML += `<div style="color:#e74c3c">❌ Erreur HTTP: ${errText}</div>`;
+                    btn.disabled = false;
+                    btn.textContent = "Réessayer";
+                }
+            } catch (e) {
+                logBox.innerHTML += `<div style="color:#e74c3c">❌ Exception JS: ${e.message}</div>`;
+                btn.disabled = false;
+                btn.textContent = "Réessayer";
+            }
+        }
+    </script>
+</body>
+</html>
+
