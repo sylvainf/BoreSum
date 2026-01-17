@@ -21,7 +21,6 @@ TRANSCRIPTION_MODEL = "openai/whisper-large-v3"
 
 DEFAULT_SUMMARY_PROMPT = """Tu es un assistant expert en rédaction de comptes rendus de réunions professionnelles.
 Ton objectif est de produire une synthèse fidèle et structurée basée sur la transcription fournie.
-Contexte: La réunion regroupe les personnels administratifs et technique d'un laboratoire de recherche academique nomé Centre Borelli
 Règles strictes :
 1. N'invente AUCUNE information qui ne figure pas explicitement dans le texte.
 2. Pas de métadonnées inventées : Ne crée pas de liste de participants, d'horaires, de lieux ou d'échéances si elles ne sont pas clairement dites.

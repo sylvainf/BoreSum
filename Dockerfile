@@ -1,9 +1,6 @@
-# Image de base légère avec Python 3.9
-FROM python:3.9-slim
+FROM python:3.9-alpine
 
-# Installation de ffmpeg (obligatoire pour le traitement audio)
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
-
+RUN apk add --no-cache ffmpeg
 # Dossier de travail dans le conteneur
 WORKDIR /app
 
