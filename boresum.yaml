@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: boresum
+    labels:
+      app: boresum
+
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: boresum
+    labels:
+      app: boresum
+  spec:
+    runPolicy: Serial
+    source:
+      binary: {} 
+      type: Binary
+    strategy:
+      type: Docker
+      dockerStrategy: {} # Utilise le Dockerfile à la racine
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "boresum:latest"
+
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: boresum
+    labels:
+      app: boresum
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: boresum
+    template:
+      metadata:
+        labels:
+          app: boresum
+      spec:
+        containers:
+        - name: boresum
+          # Pointe vers le registre interne d'OpenShift
+          image: image-registry.openshift-image-registry.svc:5000/sylvain/boresum:latest
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8000
+            protocol: TCP
+          # Injection de TOUT le secret comme variables d'env
+          envFrom:
+          - secretRef:
+              name: boresum-key-secret
+          # (Optionnel) Limites de ressources recommandées
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: boresum
+    labels:
+      app: boresum
+  spec:
+    ports:
+    - name: http-8000
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+    selector:
+      app: boresum
+
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: boresum
+    labels:
+      app: boresum
+  spec:
+    to:
+      kind: Service
+      name: boresum
+      weight: 100
+    port:
+      targetPort: 8000
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
